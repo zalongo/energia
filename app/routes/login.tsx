@@ -8,6 +8,7 @@ import { FormButton } from "~/components/forms";
 import { useApi } from "~/context/ApiContext";
 import { useNavigate } from "react-router";
 import { useEffect } from "react";
+import axios from "axios";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -19,6 +20,18 @@ export function meta({}: Route.MetaArgs) {
 export default function LoginPage() {
   const { error, login, user, hasRole, loading } = useApi();
   const navigate = useNavigate();
+
+  const verify = async() => {
+    const res = await axios.get('https://api-sibne.tchile.com/api/test/public')
+    console.log('aca', res)
+}
+useEffect(() => {
+  verify()
+}, [])
+
+
+
+
 
   const schema = z.object({
     userName: z

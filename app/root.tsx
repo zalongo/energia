@@ -42,7 +42,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
             __html: `(() => {
   try {
     const path = window.location.pathname || "/";
-    const allowDark = /^\/(admin|empresa|login)(\/|$)/.test(path);
+    // Evitar regex: detectar por primer segmento del path
+    const seg = (path || '/').split('/')[1] || '';
+    const allowDark = seg === 'admin' || seg === 'empresa' || seg === 'login';
     // Flowbite usa 'color-theme'; migramos desde 'theme' si existiera
     let stored = localStorage.getItem('color-theme');
     const legacy = localStorage.getItem('theme');
@@ -79,7 +81,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const location = useLocation();
-  const allowDark = /^\/(admin|empresa|login)(\/|$)/.test(location.pathname);
+  // Evitar regex: detectar por primer segmento del path
+  const seg = (location.pathname || '/').split('/')[1] || '';
+  const allowDark = seg === 'admin' || seg === 'empresa' || seg === 'login';
   // En navegaciones cliente, forzar claro fuera de dashboards
   useEffect(() => {
     const root = document.documentElement;
