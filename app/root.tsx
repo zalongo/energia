@@ -7,14 +7,11 @@ import {
   ScrollRestoration,
   useLocation,
 } from "react-router";
-import { useEffect } from "react";
 import { DarkThemeToggle } from "flowbite-react";
-
 
 import type { Route } from "./+types/root";
 import "./app.css";
 import { ApiProvider } from "~/context/ApiContext";
-import ThemeToggle from "~/components/ui/ThemeToggle";
 import UserMenu from "~/components/ui/UserMenu";
 
 export const links: Route.LinksFunction = () => [
@@ -31,42 +28,27 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const themeInitScript = `
+    (() => {
+      try {
+        const stored = localStorage.getItem('color-theme');
+        const mql = window.matchMedia('(prefers-color-scheme: dark)');
+        const root = document.documentElement;
+        if (stored === 'dark' || (stored === null && mql.matches)) {
+          root.classList.add('dark');
+        } else {
+          root.classList.remove('dark');
+        }
+      } catch {}
+    })();
+  `;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        {/* Script inicial para aplicar el tema antes de cargar estilos (evita FOUC) */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(() => {
-  try {
-    const path = window.location.pathname || "/";
-    // Evitar regex: detectar por primer segmento del path
-    const seg = (path || '/').split('/')[1] || '';
-    const allowDark = seg === 'admin' || seg === 'empresa' || seg === 'login';
-    // Flowbite usa 'color-theme'; migramos desde 'theme' si existiera
-    let stored = localStorage.getItem('color-theme');
-    const legacy = localStorage.getItem('theme');
-    if (!stored && (legacy === 'dark' || legacy === 'light')) {
-      try { localStorage.setItem('color-theme', legacy); localStorage.removeItem('theme'); } catch {}
-      stored = legacy;
-    }
-    const mql = window.matchMedia('(prefers-color-scheme: dark)');
-    const root = document.documentElement;
-    if (!allowDark) {
-      root.classList.remove('dark');
-    } else if (stored === 'dark') {
-      root.classList.add('dark');
-    } else if (stored === 'light') {
-      root.classList.remove('dark');
-    } else {
-      root.classList.toggle('dark', mql.matches);
-    }
-  } catch {}
-})();`,
-          }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <Meta />
         <Links />
       </head>
@@ -80,46 +62,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const location = useLocation();
-  // Evitar regex: detectar por primer segmento del path
-  const seg = (location.pathname || '/').split('/')[1] || '';
-  const allowDark = seg === 'admin' || seg === 'empresa' || seg === 'login';
-  // En navegaciones cliente, forzar claro fuera de dashboards
-  useEffect(() => {
-    const root = document.documentElement;
-    if (!allowDark) {
-      root.classList.remove("dark");
-    } else {
-      try {
-        let stored = localStorage.getItem("color-theme");
-        const legacy = localStorage.getItem("theme");
-        if (!stored && (legacy === "dark" || legacy === "light")) {
-          try { localStorage.setItem("color-theme", legacy); localStorage.removeItem("theme"); } catch {}
-          stored = legacy;
-        }
-        const mql = window.matchMedia("(prefers-color-scheme: dark)");
-        if (stored === "dark") {
-          root.classList.add("dark");
-        } else if (stored === "light") {
-          root.classList.remove("dark");
-        } else {
-          root.classList.toggle("dark", mql.matches);
-        }
-      } catch {}
-    }
-  }, [allowDark, location.pathname]);
+  useLocation();
+
   return (
-		<ApiProvider>
-			{/* Toggle de tema solo en dashboards */}
-			{allowDark && (
-				<div className="fixed right-4 top-4 z-50">
-					<DarkThemeToggle />
-				</div>
-			)}
-			{/* Menú de usuario con botón de cerrar sesión (dentro del Provider) */}
-			<UserMenu />
-			<Outlet />
-		</ApiProvider>
+    <ApiProvider>
+      {/* Botón de tema oscuro/claro siempre visible */}
+      <div className="fixed right-4 top-4 z-50">
+        <DarkThemeToggle />
+      </div>
+      <UserMenu />
+      <Outlet />
+    </ApiProvider>
   );
 }
 
