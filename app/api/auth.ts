@@ -1,9 +1,9 @@
 import api from "./axiosInstance";
 
 // Tipos basados en la guía .github/copilot-instructions.md
-export type Rol = "Administrador" | "Usuario" | "Empresa" | string;
+export type Rol = "Administrador" | "Usuario" | "Supervisor" | string;
 
-export interface Usuario {
+export interface User {
   id: string;
   userName: string;
   email: string;
@@ -14,7 +14,10 @@ export interface Usuario {
 
 export interface LoginResponse {
   message: string;
-  usuario: Usuario;
+  // Propiedad en la respuesta del backend sigue siendo `usuario` (nombre en español).
+  // Conservamos la clave tal cual para no romper el contrato HTTP, pero el tipo
+  // interno que usamos en TypeScript es `User`.
+  usuario: User;
   accessToken: string;
 }
 
@@ -46,7 +49,7 @@ export async function login(payload: LoginPayload) {
 }
 
 export async function me() {
-  const { data } = await api.get<Usuario>("/auth/me");
+  const { data } = await api.get<User>("/auth/me");
   return data;
 }
 
@@ -59,4 +62,6 @@ export async function logout() {
   await api.post("/auth/logout");
 }
 
-export type { Usuario as AuthUser };
+// Exportamos el tipo `User` como `AuthUser` para mantener la misma interfaz de import
+// usada por `ApiContext` y otros módulos.
+export type { User as AuthUser };

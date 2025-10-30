@@ -1,26 +1,26 @@
-import type { Route } from "./+types/admin";
+import type { Route } from "./+types/user";
 import { Card } from "flowbite-react";
 import { useApi } from "~/context/ApiContext";
-import AdminLayout from "~/layouts/AdminLayout";
+import UserLayout from "~/layouts/UserLayout";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Panel Admin | SIBNE" },
-    { name: "description", content: "Panel de administración" },
+    { title: "User Panel | SIBNE" },
+    { name: "description", content: "User panel" },
   ];
 }
 
-export default function AdminDashboard() {
+export default function UserDashboard() {
   const { user } = useApi();
 
   return (
-    <AdminLayout>
+    <UserLayout>
       <main className="container p-4 bg-app text-app min-h-[60vh]">
-        <h1 className="text-2xl font-semibold mb-4 text-app">Panel de Administración</h1>
+        <h1 className="text-2xl font-semibold mb-4 text-app">User Panel</h1>
         <Card className="bg-card">
           <p>Bienvenido, {user?.nombre ?? user?.userName}</p>
         </Card>
       </main>
-    </AdminLayout>
+    </UserLayout>
   );
 }
